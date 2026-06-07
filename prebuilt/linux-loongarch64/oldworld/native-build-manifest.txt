@@ -1,22 +1,22 @@
-HarfBuzzSharp LoongArch old-world ABI1.0 native build
-Generated: 2026-06-07 19:14:55 +08:00
+HarfBuzzSharp 龙芯旧世界 ABI1.0 原生库构建记录
+生成时间: 2026-06-07 19:14:55 +08:00
 
-Source:
-  SkiaSharp repository: https://github.com/mono/SkiaSharp.git
+源码:
+  SkiaSharp 仓库: https://github.com/mono/SkiaSharp.git
   SkiaSharp ref: v3.119.4
   SkiaSharp commit: f568ac94dd768ef9a2f593537cfde2dd0d348ef5
-  Note: this is the SkiaSharp HarfBuzzSharp native target, not a plain upstream libharfbuzz.so.
+  说明: 这是 SkiaSharp 的 HarfBuzzSharp 原生目标，不是普通上游 libharfbuzz.so。
 
-Toolchain:
-  Target: loongarch64-unknown-linux-gnu old-world ABI1.0
+工具链:
+  目标: loongarch64-unknown-linux-gnu 旧世界 ABI1.0
   GCC: 14.2.0
-  Sysroot source: cross-tools bundled sysroot
+  Sysroot 来源: cross-tools 内置 sysroot
 
-Output:
+产物:
   19AD258BB1E707EEA973E5CECCCA726A4B69E956405DB18612F4B770D23C1150  libHarfBuzzSharp.so
 
-ABI checks:
+ABI 检查:
   ELF: LoongArch LP64
   SONAME: libHarfBuzzSharp.so.0.60831.0
-  max GLIBC <= 2.27
-  observed versions: GLIBC_2.0, GLIBC_2.27, GLIBC_2.3.2
+  最高 GLIBC <= 2.27
+  实际符号版本: GLIBC_2.0, GLIBC_2.27, GLIBC_2.3.2

@@ -1,5 +1,7 @@
 # HarfBuzzSharp LoongArch old-world ABI1.0
 
+中文说明见 [../README.zh-CN.md](../README.zh-CN.md).
+
 This fork carries a reproducible build path for `libHarfBuzzSharp.so` targeting LoongArch old-world ABI1.0 (`linux-loongarch64`, LP64, glibc 2.28 compatible).
 
 Important: the ClassIsland runtime needs `libHarfBuzzSharp.so`, not a generic upstream `libharfbuzz.so`. The build script therefore checks out `mono/SkiaSharp` and builds the `HarfBuzzSharp` GN target with the matching version script and SONAME.

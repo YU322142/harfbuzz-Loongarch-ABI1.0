@@ -1,10 +1,10 @@
 # HarfBuzz
 
-> LoongArch old-world ABI1.0 support for this fork lives in
-> [loongarch-oldworld/README.md](loongarch-oldworld/README.md). The GitHub
-> Actions workflow builds `libHarfBuzzSharp.so` online from the matching
-> SkiaSharp native target with `loong64/cross-tools` `baseline` and verifies
-> `GLIBC <= 2.28`.
+> 本 fork 的龙芯旧世界 ABI1.0 支持文档位于
+> [loongarch-oldworld/README.md](loongarch-oldworld/README.md)。GitHub Actions
+> 会从匹配版本的 SkiaSharp 原生目标在线构建 `libHarfBuzzSharp.so`，
+> 使用 `loong64/cross-tools` 的 `baseline` 工具链，并校验
+> `GLIBC <= 2.28`。
 
 <div align="center">
 
