@@ -6,10 +6,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SKIASHARP_REPO="${SKIASHARP_REPO:-https://github.com/mono/SkiaSharp.git}"
 SKIASHARP_REF="${SKIASHARP_REF:-v3.119.4}"
-TOOLCHAIN_URL="${TOOLCHAIN_URL:-https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz}"
-TOOLCHAIN_SHA256="${TOOLCHAIN_SHA256:-}"
-SYSROOT_URL="${SYSROOT_URL:-https://github.com/YU322142/harfbuzz-Loongarch-ABI1.0/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-overlay-20260607.tar.xz}"
-SYSROOT_SHA256="${SYSROOT_SHA256:-AD9DD4DB6C74D085279FF017AB4F743DB2CBA9013A1739BE3C62E56B84CA2F30}"
+TOOLCHAIN_URL="${TOOLCHAIN_URL:-https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz}"
+TOOLCHAIN_SHA256="${TOOLCHAIN_SHA256:-3EDD0C1A612ED9E01B45D65CAED210F775738EF6FEB9173896E565B38C676A55}"
+SYSROOT_URL="${SYSROOT_URL:-https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-20260607.tar.xz}"
+SYSROOT_SHA256="${SYSROOT_SHA256:-5D442178DB80F8C1BC599B5C0E5963071BBBB33270DE05747959ADC65E7BC086}"
 MAX_GLIBC="${MAX_GLIBC:-2.28}"
 JOBS="${JOBS:-$(nproc)}"
 
@@ -95,33 +95,33 @@ prepare_toolchain() {
   READELF="$BIN_DIR/loongarch64-unknown-linux-gnu-readelf"
 
   if [ -z "${SYSROOT:-}" ]; then
-    local base
-    base="$(cd "$BIN_DIR/.." && pwd)"
-    SYSROOT="$base/loongarch64-unknown-linux-gnu/sysroot"
-    if [ ! -d "$SYSROOT" ]; then
-      SYSROOT="$(find "$base" -type d -name sysroot | head -n 1)"
+    if [ -n "$SYSROOT_URL" ]; then
+      local sysroot_archive="$CACHE_DIR/$(basename "$SYSROOT_URL")"
+      local sysroot_extract="$WORK_DIR/sysroot"
+      local sysroot_root
+      download "$SYSROOT_URL" "$sysroot_archive"
+      verify_sha256 "$sysroot_archive" "$SYSROOT_SHA256"
+      rm -rf "$sysroot_extract"
+      mkdir -p "$sysroot_extract"
+      tar -xf "$sysroot_archive" -C "$sysroot_extract"
+      sysroot_root="$sysroot_extract"
+      if [ ! -d "$sysroot_root/usr/include" ]; then
+        sysroot_root="$(find "$sysroot_extract" -type d -path '*/usr/include' -printf '%h\n' | head -n 1)"
+      fi
+      if [ -z "$sysroot_root" ] || [ ! -d "$sysroot_root/usr/include" ]; then
+        printf 'Could not find usr/include in sysroot archive: %s\n' "$sysroot_archive" >&2
+        exit 1
+      fi
+      SYSROOT="$sysroot_root"
+      log "Using old-world development sysroot: $SYSROOT_URL"
+    else
+      local base
+      base="$(cd "$BIN_DIR/.." && pwd)"
+      SYSROOT="$base/loongarch64-unknown-linux-gnu/sysroot"
+      if [ ! -d "$SYSROOT" ]; then
+        SYSROOT="$(find "$base" -type d -name sysroot | head -n 1)"
+      fi
     fi
-  fi
-
-  if [ -n "$SYSROOT_URL" ]; then
-    local sysroot_archive="$CACHE_DIR/$(basename "$SYSROOT_URL")"
-    local sysroot_extract="$WORK_DIR/sysroot-overlay"
-    local overlay_root
-    download "$SYSROOT_URL" "$sysroot_archive"
-    verify_sha256 "$sysroot_archive" "$SYSROOT_SHA256"
-    rm -rf "$sysroot_extract"
-    mkdir -p "$sysroot_extract"
-    tar -xf "$sysroot_archive" -C "$sysroot_extract"
-    overlay_root="$sysroot_extract"
-    if [ ! -d "$overlay_root/usr/include" ]; then
-      overlay_root="$(find "$sysroot_extract" -type d -path '*/usr/include' -printf '%h\n' | head -n 1)"
-    fi
-    if [ -z "$overlay_root" ] || [ ! -d "$overlay_root/usr/include" ]; then
-      printf 'Could not find usr/include in sysroot overlay: %s\n' "$sysroot_archive" >&2
-      exit 1
-    fi
-    log "Overlaying old-world development sysroot: $SYSROOT_URL"
-    cp -a "$overlay_root"/. "$SYSROOT"/
   fi
 
   for path in "$CXX" "$AR" "$READELF" "$SYSROOT"; do
@@ -245,7 +245,7 @@ HarfBuzzSharp 龙芯旧世界 ABI1.0 原生库构建记录
   Root: $TOOLCHAIN_ROOT
   GCC: $("$CC" --version | head -n 1)
   Sysroot: $SYSROOT
-  Sysroot overlay: $(if [ -n "$SYSROOT_URL" ]; then printf '%s' "$SYSROOT_URL"; else printf 'none'; fi)
+  Sysroot source: $(if [ -n "$SYSROOT_URL" ]; then printf '%s' "$SYSROOT_URL"; else printf 'toolchain bundled sysroot'; fi)
 
 产物:
   $(sha256sum "$OUT_DIR/libHarfBuzzSharp.so")

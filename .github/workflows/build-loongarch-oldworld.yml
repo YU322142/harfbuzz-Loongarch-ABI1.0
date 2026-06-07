@@ -10,15 +10,19 @@ on:
       toolchainUrl:
         description: cross-tools archive URL
         required: true
-        default: https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz
+        default: https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz
+      toolchainSha256:
+        description: cross-tools archive SHA256
+        required: false
+        default: 3EDD0C1A612ED9E01B45D65CAED210F775738EF6FEB9173896E565B38C676A55
       sysrootUrl:
-        description: Optional old-world development sysroot overlay archive URL
+        description: Old-world development sysroot archive URL
         required: false
-        default: https://github.com/YU322142/harfbuzz-Loongarch-ABI1.0/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-overlay-20260607.tar.xz
+        default: https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-20260607.tar.xz
       sysrootSha256:
-        description: Optional old-world development sysroot overlay SHA256
+        description: Old-world development sysroot archive SHA256
         required: false
-        default: AD9DD4DB6C74D085279FF017AB4F743DB2CBA9013A1739BE3C62E56B84CA2F30
+        default: 5D442178DB80F8C1BC599B5C0E5963071BBBB33270DE05747959ADC65E7BC086
   push:
     branches:
       - main
@@ -43,7 +47,8 @@ jobs:
       - name: Build libHarfBuzzSharp.so
         env:
           SKIASHARP_REF: ${{ github.event.inputs.skiaSharpRef || 'v3.119.4' }}
-          TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz' }}
+          TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz' }}
+          TOOLCHAIN_SHA256: ${{ github.event.inputs.toolchainSha256 || '' }}
           SYSROOT_URL: ${{ github.event.inputs.sysrootUrl || '' }}
           SYSROOT_SHA256: ${{ github.event.inputs.sysrootSha256 || '' }}
           MAX_GLIBC: "2.28"

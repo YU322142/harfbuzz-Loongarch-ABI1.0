@@ -3,7 +3,7 @@
 > 本 fork 的龙芯旧世界 ABI1.0 支持文档位于
 > [loongarch-oldworld/README.md](loongarch-oldworld/README.md)。GitHub Actions
 > 会从匹配版本的 SkiaSharp 原生目标在线构建 `libHarfBuzzSharp.so`，
-> 使用 `loong64/cross-tools` 的 `baseline` 工具链，并校验
+> 使用 `loong64/cross-tools` 的 `legacy` 工具链，并校验
 > `GLIBC <= 2.28`。
 
 <div align="center">
