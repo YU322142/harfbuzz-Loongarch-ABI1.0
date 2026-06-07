@@ -10,7 +10,7 @@
 - ABI：LoongArch old-world ABI1.0，LP64
 - GLIBC 上限：`GLIBC_2.28`
 - 源码基线：`mono/SkiaSharp` `v3.119.4` 中的 `HarfBuzzSharp` GN target
-- 默认工具链：`loong64/cross-tools` `legacy`（2025-05-07）
+- 默认工具链：`YU322142/loongarch-oldworld-sysroot` 发布的 Linux x64 旧世界 GCC 14 工具链
 - 默认 sysroot：`YU322142/loongarch-oldworld-sysroot` 发布的完整旧世界开发 sysroot
 
 ## 为什么不是普通 libharfbuzz.so
@@ -31,13 +31,13 @@ prebuilt/linux-loongarch64/oldworld/libHarfBuzzSharp.so
 
 推送到 `main` 或手动运行 GitHub Actions `Build LoongArch old-world ABI1.0` 即可构建。
 
-Actions 默认使用 `loong64/cross-tools` 2025-05-07 的 `legacy` 工具链，并下载 `YU322142/loongarch-oldworld-sysroot` release 中的完整旧世界开发 sysroot。构建时会直接把 `--sysroot` 指向该 sysroot，不再使用 cross-tools 自带 sysroot 参与链接。该 sysroot 来自本地旧世界开发环境，用于补齐在线构建需要的开发头文件和库。
+Actions 默认使用 `YU322142/loongarch-oldworld-sysroot` release 中的 Linux x64 旧世界 GCC 14 工具链，并下载同一 release 中的完整旧世界开发 sysroot。构建时会直接把 `--sysroot` 指向该 sysroot，不再使用公开 cross-tools 自带 sysroot 参与链接。该 sysroot 来自本地旧世界开发环境，用于补齐在线构建需要的开发头文件和库。
 
 默认工具链：
 
 ```text
-https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz
-SHA256: 3EDD0C1A612ED9E01B45D65CAED210F775738EF6FEB9173896E565B38C676A55
+https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/linux-x64-cross-tools-loongarch64-oldworld-gcc14-20260607.tar.xz
+SHA256: 78335E5FCE4FDD6505B23734C539304547753FA1887CC199F5EA0C7554ED0185
 ```
 
 默认 sysroot：

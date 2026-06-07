@@ -8,13 +8,13 @@ on:
         required: true
         default: v3.119.4
       toolchainUrl:
-        description: cross-tools archive URL
+        description: Old-world cross toolchain archive URL
         required: true
-        default: https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz
+        default: https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/linux-x64-cross-tools-loongarch64-oldworld-gcc14-20260607.tar.xz
       toolchainSha256:
-        description: cross-tools archive SHA256
+        description: Old-world cross toolchain archive SHA256
         required: false
-        default: 3EDD0C1A612ED9E01B45D65CAED210F775738EF6FEB9173896E565B38C676A55
+        default: 78335E5FCE4FDD6505B23734C539304547753FA1887CC199F5EA0C7554ED0185
       sysrootUrl:
         description: Old-world development sysroot archive URL
         required: false
@@ -47,7 +47,7 @@ jobs:
       - name: Build libHarfBuzzSharp.so
         env:
           SKIASHARP_REF: ${{ github.event.inputs.skiaSharpRef || 'v3.119.4' }}
-          TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/loong64/cross-tools/releases/download/20250507/x86_64-cross-tools-loongarch64-unknown-linux-gnu-legacy.tar.xz' }}
+          TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/linux-x64-cross-tools-loongarch64-oldworld-gcc14-20260607.tar.xz' }}
           TOOLCHAIN_SHA256: ${{ github.event.inputs.toolchainSha256 || '' }}
           SYSROOT_URL: ${{ github.event.inputs.sysrootUrl || '' }}
           SYSROOT_SHA256: ${{ github.event.inputs.sysrootSha256 || '' }}
