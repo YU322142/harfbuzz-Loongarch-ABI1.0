@@ -84,6 +84,9 @@ prepare_toolchain() {
     TOOLCHAIN_ROOT="$extract_dir"
   fi
 
+  chmod -R a+rX "$TOOLCHAIN_ROOT" 2>/dev/null || true
+  find "$TOOLCHAIN_ROOT" -type f \( -path '*/bin/*' -o -path '*/libexec/*' \) -exec chmod a+x {} + 2>/dev/null || true
+
   CC="$(find "$TOOLCHAIN_ROOT" -type f -name loongarch64-unknown-linux-gnu-gcc | head -n 1)"
   if [ -z "$CC" ]; then
     printf 'Could not find loongarch64-unknown-linux-gnu-gcc under %s\n' "$TOOLCHAIN_ROOT" >&2
