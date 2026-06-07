@@ -1,5 +1,11 @@
 # HarfBuzz
 
+> LoongArch old-world ABI1.0 support for this fork lives in
+> [loongarch-oldworld/README.md](loongarch-oldworld/README.md). The GitHub
+> Actions workflow builds `libHarfBuzzSharp.so` online from the matching
+> SkiaSharp native target with `loong64/cross-tools` `baseline` and verifies
+> `GLIBC <= 2.28`.
+
 <div align="center">
 
 <p><img src="HarfBuzz.png" alt="HarfBuzz Logo" width="256"/></p>

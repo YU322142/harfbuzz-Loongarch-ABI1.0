@@ -1,0 +1,55 @@
+name: Build LoongArch old-world ABI1.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      skiaSharpRef:
+        description: SkiaSharp ref or tag
+        required: true
+        default: v3.119.4
+      toolchainUrl:
+        description: cross-tools archive URL
+        required: true
+        default: https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz
+      sysrootUrl:
+        description: Optional external sysroot archive URL
+        required: false
+        default: ""
+  push:
+    branches:
+      - master
+    paths:
+      - loongarch-oldworld/**
+      - .github/workflows/build-loongarch-oldworld.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3 curl xz-utils tar ca-certificates
+
+      - name: Build libHarfBuzzSharp.so
+        env:
+          SKIASHARP_REF: ${{ github.event.inputs.skiaSharpRef || 'v3.119.4' }}
+          TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz' }}
+          SYSROOT_URL: ${{ github.event.inputs.sysrootUrl || '' }}
+          MAX_GLIBC: "2.28"
+        run: bash loongarch-oldworld/build-harfbuzzsharp.sh
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libHarfBuzzSharp-linux-loongarch64-oldworld
+          path: |
+            artifacts/loongarch-oldworld/out/libHarfBuzzSharp.so
+            artifacts/loongarch-oldworld/out/libHarfBuzzSharp.so.0.60831.0
+            artifacts/loongarch-oldworld/out/native-build-manifest.txt
+          if-no-files-found: error
