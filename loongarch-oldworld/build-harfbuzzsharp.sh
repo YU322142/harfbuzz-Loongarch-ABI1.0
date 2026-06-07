@@ -8,8 +8,8 @@ SKIASHARP_REPO="${SKIASHARP_REPO:-https://github.com/mono/SkiaSharp.git}"
 SKIASHARP_REF="${SKIASHARP_REF:-v3.119.4}"
 TOOLCHAIN_URL="${TOOLCHAIN_URL:-https://github.com/loong64/cross-tools/releases/download/20260519/x86_64-cross-tools-loongarch64-unknown-linux-gnu-baseline.tar.xz}"
 TOOLCHAIN_SHA256="${TOOLCHAIN_SHA256:-}"
-SYSROOT_URL="${SYSROOT_URL:-}"
-SYSROOT_SHA256="${SYSROOT_SHA256:-}"
+SYSROOT_URL="${SYSROOT_URL:-https://github.com/YU322142/harfbuzz-Loongarch-ABI1.0/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-overlay-20260607.tar.xz}"
+SYSROOT_SHA256="${SYSROOT_SHA256:-AD9DD4DB6C74D085279FF017AB4F743DB2CBA9013A1739BE3C62E56B84CA2F30}"
 MAX_GLIBC="${MAX_GLIBC:-2.28}"
 JOBS="${JOBS:-$(nproc)}"
 
@@ -95,23 +95,33 @@ prepare_toolchain() {
   READELF="$BIN_DIR/loongarch64-unknown-linux-gnu-readelf"
 
   if [ -z "${SYSROOT:-}" ]; then
-    if [ -n "$SYSROOT_URL" ]; then
-      local sysroot_archive="$CACHE_DIR/$(basename "$SYSROOT_URL")"
-      local sysroot_extract="$WORK_DIR/sysroot-override"
-      download "$SYSROOT_URL" "$sysroot_archive"
-      verify_sha256 "$sysroot_archive" "$SYSROOT_SHA256"
-      rm -rf "$sysroot_extract"
-      mkdir -p "$sysroot_extract"
-      tar -xf "$sysroot_archive" -C "$sysroot_extract"
-      SYSROOT="$(find "$sysroot_extract" -type d -path '*/usr/include' -printf '%h\n' | head -n 1)"
-    else
-      local base
-      base="$(cd "$BIN_DIR/.." && pwd)"
-      SYSROOT="$base/loongarch64-unknown-linux-gnu/sysroot"
-      if [ ! -d "$SYSROOT" ]; then
-        SYSROOT="$(find "$base" -type d -name sysroot | head -n 1)"
-      fi
+    local base
+    base="$(cd "$BIN_DIR/.." && pwd)"
+    SYSROOT="$base/loongarch64-unknown-linux-gnu/sysroot"
+    if [ ! -d "$SYSROOT" ]; then
+      SYSROOT="$(find "$base" -type d -name sysroot | head -n 1)"
     fi
+  fi
+
+  if [ -n "$SYSROOT_URL" ]; then
+    local sysroot_archive="$CACHE_DIR/$(basename "$SYSROOT_URL")"
+    local sysroot_extract="$WORK_DIR/sysroot-overlay"
+    local overlay_root
+    download "$SYSROOT_URL" "$sysroot_archive"
+    verify_sha256 "$sysroot_archive" "$SYSROOT_SHA256"
+    rm -rf "$sysroot_extract"
+    mkdir -p "$sysroot_extract"
+    tar -xf "$sysroot_archive" -C "$sysroot_extract"
+    overlay_root="$sysroot_extract"
+    if [ ! -d "$overlay_root/usr/include" ]; then
+      overlay_root="$(find "$sysroot_extract" -type d -path '*/usr/include' -printf '%h\n' | head -n 1)"
+    fi
+    if [ -z "$overlay_root" ] || [ ! -d "$overlay_root/usr/include" ]; then
+      printf 'Could not find usr/include in sysroot overlay: %s\n' "$sysroot_archive" >&2
+      exit 1
+    fi
+    log "Overlaying old-world development sysroot: $SYSROOT_URL"
+    cp -a "$overlay_root"/. "$SYSROOT"/
   fi
 
   for path in "$CXX" "$AR" "$READELF" "$SYSROOT"; do
@@ -140,7 +150,7 @@ assert_glibc_max() {
       printf '%s requires GLIBC_%s, above GLIBC_%s\n' "$so" "$version" "$MAX_GLIBC" >&2
       bad=1
     fi
-  done < <("$READELF" --version-info "$so" | grep -Eo 'GLIBC_[0-9]+(\.[0-9]+)+' | sed 's/^GLIBC_//' | sort -Vu)
+  done < <("$READELF" --version-info "$so" | grep -Eo 'GLIBC_[0-9]+(\.[0-9]+)+' | sed 's/^GLIBC_//' | sort -Vu || true)
   if [ "$bad" -ne 0 ]; then
     exit 1
   fi
@@ -148,8 +158,23 @@ assert_glibc_max() {
 
 assert_loongarch_elf() {
   local so="$1"
-  "$READELF" -h "$so" | grep -q 'Machine:.*LoongArch'
-  "$READELF" -h "$so" | grep -q 'Flags:.*LP64'
+  local header
+  header="$("$READELF" -h "$so")"
+  if ! printf '%s\n' "$header" | grep -q 'Class:.*ELF64'; then
+    printf '%s is not an ELF64 object\n' "$so" >&2
+    printf '%s\n' "$header" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$header" | grep -q 'Machine:.*LoongArch'; then
+    printf '%s is not a LoongArch object\n' "$so" >&2
+    printf '%s\n' "$header" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$header" | grep -q 'Flags:.*LP64'; then
+    printf '%s does not report LP64 flags\n' "$so" >&2
+    printf '%s\n' "$header" >&2
+    exit 1
+  fi
 }
 
 write_gn_args() {
@@ -169,9 +194,9 @@ skia_enable_tools=false
 target_os="linux"
 target_cpu="loong64"
 visibility_hidden=false
-extra_cflags=[ "--sysroot=$sysroot_gn" ]
+extra_cflags=[ "--sysroot=$sysroot_gn", "-I$sysroot_gn/usr/include" ]
 extra_asmflags=[]
-extra_ldflags=[ "--sysroot=$sysroot_gn", "-static-libstdc++", "-static-libgcc", "-Wl,-rpath-link,$sysroot_gn/usr/lib64", "-Wl,-rpath-link,$sysroot_gn/lib64", "-Wl,--version-script=$map_gn" ]
+extra_ldflags=[ "--sysroot=$sysroot_gn", "-static-libstdc++", "-static-libgcc", "-L$sysroot_gn/usr/lib64", "-L$sysroot_gn/lib64", "-L$sysroot_gn/usr/lib/loongarch64-linux-gnu", "-L$sysroot_gn/lib/loongarch64-linux-gnu", "-Wl,-rpath-link,$sysroot_gn/usr/lib64", "-Wl,-rpath-link,$sysroot_gn/lib64", "-Wl,-rpath-link,$sysroot_gn/usr/lib/loongarch64-linux-gnu", "-Wl,-rpath-link,$sysroot_gn/lib/loongarch64-linux-gnu", "-Wl,--version-script=$map_gn" ]
 cc="$cc_gn"
 cxx="$cxx_gn"
 ar="$ar_gn"
@@ -204,7 +229,7 @@ build_harfbuzzsharp() {
   cp -f "$so" "$OUT_DIR/libHarfBuzzSharp.so.0.60831.0"
 
   local versions
-  versions="$("$READELF" --version-info "$so" | grep -Eo 'GLIBC_[0-9]+(\.[0-9]+)+' | sort -Vu | tr '\n' ' ')"
+  versions="$("$READELF" --version-info "$so" | grep -Eo 'GLIBC_[0-9]+(\.[0-9]+)+' | sort -Vu | tr '\n' ' ' || true)"
   cat > "$OUT_DIR/native-build-manifest.txt" <<EOF
 HarfBuzzSharp 龙芯旧世界 ABI1.0 原生库构建记录
 生成时间: $(date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -220,7 +245,7 @@ HarfBuzzSharp 龙芯旧世界 ABI1.0 原生库构建记录
   Root: $TOOLCHAIN_ROOT
   GCC: $("$CC" --version | head -n 1)
   Sysroot: $SYSROOT
-  Sysroot 来源: $(if [ -n "$SYSROOT_URL" ]; then printf '%s' "$SYSROOT_URL"; else printf 'cross-tools 内置 sysroot'; fi)
+  Sysroot overlay: $(if [ -n "$SYSROOT_URL" ]; then printf '%s' "$SYSROOT_URL"; else printf 'none'; fi)
 
 产物:
   $(sha256sum "$OUT_DIR/libHarfBuzzSharp.so")
