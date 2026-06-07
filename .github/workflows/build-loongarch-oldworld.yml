@@ -48,9 +48,9 @@ jobs:
         env:
           SKIASHARP_REF: ${{ github.event.inputs.skiaSharpRef || 'v3.119.4' }}
           TOOLCHAIN_URL: ${{ github.event.inputs.toolchainUrl || 'https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/linux-x64-cross-tools-loongarch64-oldworld-gcc14-20260607.tar.xz' }}
-          TOOLCHAIN_SHA256: ${{ github.event.inputs.toolchainSha256 || '' }}
-          SYSROOT_URL: ${{ github.event.inputs.sysrootUrl || '' }}
-          SYSROOT_SHA256: ${{ github.event.inputs.sysrootSha256 || '' }}
+          TOOLCHAIN_SHA256: ${{ github.event.inputs.toolchainSha256 || '78335E5FCE4FDD6505B23734C539304547753FA1887CC199F5EA0C7554ED0185' }}
+          SYSROOT_URL: ${{ github.event.inputs.sysrootUrl || 'https://github.com/YU322142/loongarch-oldworld-sysroot/releases/download/oldworld-dev-sysroot-20260607/loongarch64-oldworld-dev-sysroot-20260607.tar.xz' }}
+          SYSROOT_SHA256: ${{ github.event.inputs.sysrootSha256 || '5D442178DB80F8C1BC599B5C0E5963071BBBB33270DE05747959ADC65E7BC086' }}
           MAX_GLIBC: "2.28"
         run: bash loongarch-oldworld/build-harfbuzzsharp.sh
 
