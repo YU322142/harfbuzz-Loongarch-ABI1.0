@@ -17,7 +17,7 @@ on:
         default: ""
   push:
     branches:
-      - master
+      - main
     paths:
       - loongarch-oldworld/**
       - .github/workflows/build-loongarch-oldworld.yml
