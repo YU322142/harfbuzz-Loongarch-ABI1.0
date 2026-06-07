@@ -170,8 +170,8 @@ assert_loongarch_elf() {
     printf '%s\n' "$header" >&2
     exit 1
   fi
-  if ! printf '%s\n' "$header" | grep -q 'Flags:.*LP64'; then
-    printf '%s does not report LP64 flags\n' "$so" >&2
+  if ! printf '%s\n' "$header" | grep -Eq 'Flags:.*(LP64|OBJ-v1)'; then
+    printf '%s does not report old-world LP64-compatible flags\n' "$so" >&2
     printf '%s\n' "$header" >&2
     exit 1
   fi
