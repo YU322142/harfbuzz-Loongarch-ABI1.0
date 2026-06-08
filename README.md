@@ -4,7 +4,9 @@
 > [loongarch-oldworld/README.md](loongarch-oldworld/README.md)。GitHub Actions
 > 会从匹配版本的 SkiaSharp 原生目标在线构建 `libHarfBuzzSharp.so`，
 > 使用 `YU322142/loongarch-oldworld-sysroot` 发布的旧世界工具链和 sysroot，并校验
-> `GLIBC <= 2.28`。
+> `GLIBC <= 2.28`。Release 中的 `libHarfBuzzSharp.so.0.60831.0` 是同一原生库的
+> SONAME/版本化文件名，保留它是为了匹配 Linux 共享库和 HarfBuzzSharp NativeAssets 的
+> ABI 命名习惯。
 
 <div align="center">
 

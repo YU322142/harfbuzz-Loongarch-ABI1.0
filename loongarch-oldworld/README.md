@@ -45,6 +45,8 @@ The script writes:
 - `artifacts/loongarch-oldworld/out/libHarfBuzzSharp.so.0.60831.0`
 - `artifacts/loongarch-oldworld/out/native-build-manifest.txt`
 
+`libHarfBuzzSharp.so.0.60831.0` is the SONAME/versioned filename for the same native HarfBuzzSharp shared library. The `0.60831.0` suffix comes from the native ABI naming used by the current `HarfBuzzSharp.NativeAssets.Linux` 8.3.1.3 package line. `libHarfBuzzSharp.so` is the stable loader name used by .NET P/Invoke and NuGet native assets; the versioned filename is kept so the release can also be inspected and reused like a normal Linux shared library artifact.
+
 The committed `prebuilt/linux-loongarch64/oldworld/libHarfBuzzSharp.so` is the locally verified build used for ClassIsland testing.
 
 The CI gate fails if the output is not LoongArch LP64 or if any required GLIBC symbol version is newer than `GLIBC_2.28`.
